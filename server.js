@@ -19,13 +19,10 @@ app.all("*",function(req,res,next){
   else
       next();
 })
-
 app.use('/api/film/', FilmRouter);
 app.use('/api/user/', UserRouter);
 app.use('/api/detail/', DetailRouter);
 app.use('/api/login/', LoginRouter);
-
-
 
 app.listen(4000);
 console.log('服务启动成功');
