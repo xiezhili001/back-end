@@ -5,44 +5,34 @@ var async = require('async');
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://127.0.0.1:27017/';
 
-
-// 获取影片列表  location:3000/api/film/list
-router.get('/list', function(req, res) {
+// 获取影片列表  http://127.0.0.1:3000/api/album/list
+router.get('/list', function (req, res) {
   var pageNum = parseInt(req.query.pageNum) || 1; // 当前第几页
-  var pageSize = parseInt(req.query.pageSize) || 5; // 每页显示多少条
-  var type = parseInt(req.query.type) || 1; // 影片的类型，正在上映or即将上映 1-正在上映 2-即将上映
-
-  // 1. 需要获取到整个影片的数据条数 - 根据 type 来区分。
-  // 2. 根据传递过来的参数计算  skip  limit
+  var pageSize = parseInt(req.query.pageSize) || 10; // 每页显示多少条
+  var classify = parseInt(req.query.classify)
+  var startTime = parseInt(req.query.startTime)
+  var endTime = parseInt(req.query.endTime)
 
   var param = {};
-  if (type === 1) {
-    // 正在热映
-    param = {
-      premiereAt: { $lt: new Date().getTime() / 1000 }
-    }
-  } else {
-    // 即将上映
-    param = {
-      premiereAt: { $gte: new Date().getTime() / 1000 }
-    }
-  }
+  if (classify) param.classify = classify
+  if (startTime || endTime) param.date = {}
+  if (startTime) param.date['$gte'] = startTime
+  if (endTime) param.date['$lte'] = endTime
 
-  MongoClient.connect(url, { useNewUrlParser: true }, function(err, client) {
+  MongoClient.connect(url, {
+    useNewUrlParser: true
+  }, function (err, client) {
     if (err) {
-      // 直接返回错误
       console.log('链接数据库失败', err);
       res.json({
         code: 1,
         msg: '网络异常, 请稍候重试'
       })
     } else {
-
-      var db = client.db('maizuo');
-
+      var db = client.db('myBlog');
       async.waterfall([
         function (cb) {
-          db.collection('films').find(param).count(function(err, num) {
+          db.collection('album').find(param).count(function (err, num) {
             if (err) {
               cb(err);
             } else {
@@ -50,17 +40,21 @@ router.get('/list', function(req, res) {
             }
           })
         },
-
         function (num, cb) {
-          db.collection('films').find(param).skip(pageSize * pageNum - pageSize).limit(pageSize).toArray(function(err, data) {
+          console.log(param);
+          db.collection('album').find(param).skip(pageSize * pageNum - pageSize).limit(pageSize).toArray(function (err, data) {
+            console.log(data);
             if (err) {
               cb(err);
             } else {
-              cb(null, {num: num, data: data});
+              cb(null, {
+                num: num,
+                data: data
+              });
             }
           })
         }
-      ], function(err, result) {
+      ], function (err, result) {
         if (err) {
           console.log(err);
           res.json({
@@ -72,7 +66,7 @@ router.get('/list', function(req, res) {
             code: 0,
             msg: 'OK',
             data: {
-              films: result.data,
+              album: result.data,
               total: result.num
             }
           })
@@ -82,6 +76,4 @@ router.get('/list', function(req, res) {
     }
   })
 })
-
-
 module.exports = router;
