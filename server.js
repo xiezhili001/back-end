@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
 
 // 引入路由模块
 var LoginRouter = require('./routes/login.js')
@@ -17,6 +18,9 @@ app.all("*", function (req, res, next) {
     else
         next();
 })
+app.use(bodyParser.urlencoded({
+    extended:true
+}));
 app.use('/api/login/', LoginRouter);
 app.use('/api/album/', AlbumRouter);
 

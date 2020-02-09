@@ -1,11 +1,10 @@
-// 专门处理影片相关的接口
 var express = require('express');
 var router = express.Router();
 var async = require('async');
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://127.0.0.1:27017/';
 
-// 获取影片列表  http://127.0.0.1:3000/api/album/list
+// 获取图片列表  http://127.0.0.1:3000/api/album/list
 router.get('/list', function (req, res) {
   var pageNum = parseInt(req.query.pageNum) || 1; // 当前第几页
   var pageSize = parseInt(req.query.pageSize) || 10; // 每页显示多少条
@@ -41,9 +40,7 @@ router.get('/list', function (req, res) {
           })
         },
         function (num, cb) {
-          console.log(param);
           db.collection('album').find(param).skip(pageSize * pageNum - pageSize).limit(pageSize).toArray(function (err, data) {
-            console.log(data);
             if (err) {
               cb(err);
             } else {

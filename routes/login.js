@@ -1,51 +1,75 @@
-// 专门处理影片相关的接口
 var express = require('express');
 var router = express.Router();
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://127.0.0.1:27017/';
 
 
-// 获取影片列表  location:3000/api/detail/list
-router.get('/', function (req, res) {
-  var userName = req.query.userName;
-  var age = parseInt(req.query.password);
+// 登录  location:3000/api/login/user
+router.post('/user', function (req, res) {
+  // 1. 获取前端传递过来的参数
+  var userName = req.body.userName;
+  var password = req.body.password;
 
+  // 2. 验证参数的有效性
+  if (!userName) {
+    res.json({
+      code: 1,
+      msg: '用户名不能为空'
+    })
+    return;
+  }
+  if (!password) {
+    res.json({
+      code: 1,
+      msg: '密码不能为空'
+    })
+    return;
+  }
+
+  // 3. 链接数据库做验证
   MongoClient.connect(url, {
     useNewUrlParser: true
   }, function (err, client) {
     if (err) {
-      // 直接返回错误
-      console.log('链接数据库失败', err);
+      console.log('连接失败', err);
       res.json({
         code: 1,
         msg: '网络异常, 请稍候重试'
       })
-    } else {
-
-      var db = client.db('maizuo');
-
-      db.collection('user').find({
-        name: userName,
-        age: age
-      }).count(function (err, num) {
-        if (err) {
-          res.json({
-            code: 1,
-            msg: '网络异常, 请稍候重试'
-          })
-        } else {
-          res.json({
-            code: 0,
-            msg: 'OK',
-            data: num
-          })
-
-        }
-      })
-      client.close();
+      return;
     }
+
+    var db = client.db('myBlog');
+    console.log(userName);
+    console.log(password);
+    db.collection('user').find({
+      userName: userName,
+      password: password
+    }).toArray(function (err, data) {
+      if (err) {
+        console.log('查询失败', err);
+        res.json({
+          code: 1,
+          msg: '网络异常, 请稍候重试'
+        })
+      } else if (data.length <= 0) {
+        // 没找到，登录失败
+        res.json({
+          code: 1,
+          msg: '用户名或密码错误'
+        })
+      } else {
+        res.json({
+          code: 0,
+          msg: '登录成功',
+          data: data[0]
+        })
+      }
+      client.close();
+    })
+
   })
-})
+});
 
 
 module.exports = router;
