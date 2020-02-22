@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 // 引入路由模块
 var LoginRouter = require('./routes/login.js')
 var AlbumRouter = require('./routes/album.js');
+var BlogRouter = require('./routes/blog.js');
 // 使用路由模块，中间件
 app.all("*", function (req, res, next) {
     //设置允许跨域的域名，*代表允许任意域名跨域
@@ -21,6 +22,7 @@ app.all("*", function (req, res, next) {
 app.use(bodyParser.urlencoded({
     extended:true
 }));
+app.use('/api/blog/', BlogRouter);
 app.use('/api/login/', LoginRouter);
 app.use('/api/album/', AlbumRouter);
 
