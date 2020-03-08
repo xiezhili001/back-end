@@ -1,9 +1,10 @@
 var express = require('express');
+var fs = require('fs');
 var router = express.Router();
 var async = require('async');
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://127.0.0.1:27017/';
-
+var multer = require('multer')
 // 获取图片列表  http://127.0.0.1:3000/api/album/list
 router.get('/list', function (req, res) {
   var pageNum = parseInt(req.query.pageNum) || 1; // 当前第几页
@@ -73,4 +74,34 @@ router.get('/list', function (req, res) {
     }
   })
 })
+router.post('/upload', multer({
+  //设置文件存储路径
+  dest: 'public/img'
+}).array('file', 1), function (req, res, next) { //这里10表示最大支持的文件上传数目
+  let files = req.files;
+  console.log(files[0]);
+  if (files.length === 0) {
+    res.json({
+      code: 1,
+      msg: '上传文件不能为空！'
+    })
+    return
+  } else {
+    let file = files[0];
+    let fileInfo = {};
+    let path = './public/img/' + Date.now().toString() + file.originalname;
+    fs.renameSync('./public/img/' + file.filename, path);
+    //获取文件基本信息
+    console.log(file.mimetype,file.originalname);
+    fileInfo.type = file.mimetype;
+    fileInfo.name = file.originalame;
+    fileInfo.size = file.size;
+    fileInfo.path = path;
+    res.json({
+      code: 0,
+      msg: 'OK',
+      data: fileInfo
+    })
+  }
+});
 module.exports = router;

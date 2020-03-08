@@ -1,7 +1,8 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
-
+var webSocket = require('./websocket.js')
+app.use(express.static('./public'));
 // 引入路由模块
 var LoginRouter = require('./routes/login.js')
 var AlbumRouter = require('./routes/album.js');
@@ -20,11 +21,13 @@ app.all("*", function (req, res, next) {
         next();
 })
 app.use(bodyParser.urlencoded({
-    extended:true
+    extended: true
 }));
 app.use('/api/blog/', BlogRouter);
 app.use('/api/login/', LoginRouter);
 app.use('/api/album/', AlbumRouter);
 
-app.listen(3000);
+let server = app.listen(3000);
+webSocket(server)
+
 console.log('服务启动成功');
