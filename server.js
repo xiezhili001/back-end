@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var webSocket = require('./websocket.js')
-app.use(express.static('./public'));
+app.use(express.static('./'));
 // 引入路由模块
 var LoginRouter = require('./routes/login.js')
 var AlbumRouter = require('./routes/album.js');

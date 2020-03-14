@@ -41,7 +41,7 @@ router.get('/list', function (req, res) {
           })
         },
         function (num, cb) {
-          db.collection('album').find(param).skip(pageSize * pageNum - pageSize).limit(pageSize).toArray(function (err, data) {
+          db.collection('album').find(param).sort({date: -1}).skip(pageSize * pageNum - pageSize).limit(pageSize).toArray(function (err, data) {
             if (err) {
               cb(err);
             } else {
@@ -74,34 +74,64 @@ router.get('/list', function (req, res) {
     }
   })
 })
+router.post('/add', function (req, res) {
+  // 1. 获取前端传递过来的参数
+  var classify = req.body.classify;
+  var imgUrl = '/'+req.body.url;
+  var date = new Date().getTime();
+
+  // 3. 链接数据库做验证
+  MongoClient.connect(url, {
+    useNewUrlParser: true
+  }, function (err, client) {
+    if (err) {
+      console.log('连接失败', err);
+      res.json({
+        code: 1,
+        msg: '网络异常, 请稍候重试'
+      })
+      return;
+    }
+
+    var db = client.db('myBlog');
+    db.collection('album').insertOne({
+      url:imgUrl,
+      classify,
+      date
+    }, function (err, data) {
+      if (err) {
+        res.json({
+          code: 1,
+          msg: '错误'
+        })
+      } else {
+        res.json({
+          code: 0,
+          msg: 'OK',
+        })
+      }
+      client.close();
+    })
+  })
+});
 router.post('/upload', multer({
   //设置文件存储路径
   dest: 'public/img'
-}).array('file', 1), function (req, res, next) { //这里10表示最大支持的文件上传数目
+}).array('file', 1), function (req, res, next) {
   let files = req.files;
-  console.log(files[0]);
-  if (files.length === 0) {
-    res.json({
-      code: 1,
-      msg: '上传文件不能为空！'
-    })
-    return
-  } else {
-    let file = files[0];
-    let fileInfo = {};
-    let path = './public/img/' + Date.now().toString() + file.originalname;
-    fs.renameSync('./public/img/' + file.filename, path);
-    //获取文件基本信息
-    console.log(file.mimetype,file.originalname);
-    fileInfo.type = file.mimetype;
-    fileInfo.name = file.originalame;
-    fileInfo.size = file.size;
-    fileInfo.path = path;
-    res.json({
-      code: 0,
-      msg: 'OK',
-      data: fileInfo
-    })
-  }
+  let file = files[0];
+  let fileInfo = {};
+  let path = 'public/img/' + Date.now().toString() + '_' + file.originalname;
+  fs.renameSync('./public/img/' + file.filename, path);
+  //获取文件基本信息
+  fileInfo.type = file.mimetype;
+  fileInfo.name = file.originalname;
+  fileInfo.size = file.size;
+  fileInfo.path = path;
+  res.json({
+    code: 0,
+    msg: 'OK',
+    data: fileInfo
+  })
 });
 module.exports = router;
