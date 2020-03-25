@@ -41,7 +41,9 @@ router.get('/list', function (req, res) {
           })
         },
         function (num, cb) {
-          db.collection('album').find(param).sort({date: -1}).skip(pageSize * pageNum - pageSize).limit(pageSize).toArray(function (err, data) {
+          db.collection('album').find(param).sort({
+            date: -1
+          }).skip(pageSize * pageNum - pageSize).limit(pageSize).toArray(function (err, data) {
             if (err) {
               cb(err);
             } else {
@@ -77,7 +79,7 @@ router.get('/list', function (req, res) {
 router.post('/add', function (req, res) {
   // 1. 获取前端传递过来的参数
   var classify = req.body.classify;
-  var imgUrl = '/'+req.body.url;
+  var imgUrl = '/' + req.body.url;
   var date = new Date().getTime();
 
   // 3. 链接数据库做验证
@@ -95,7 +97,7 @@ router.post('/add', function (req, res) {
 
     var db = client.db('myBlog');
     db.collection('album').insertOne({
-      url:imgUrl,
+      url: imgUrl,
       classify,
       date
     }, function (err, data) {

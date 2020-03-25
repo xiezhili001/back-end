@@ -2,8 +2,10 @@ var express = require('express');
 var router = express.Router();
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://127.0.0.1:27017/';
-
-
+var jwt = require('jsonwebtoken')
+var {
+  secret
+} = require('../config')
 // 登录  location:3000/api/login/user
 router.post('/user', function (req, res) {
   // 1. 获取前端传递过来的参数
@@ -53,16 +55,23 @@ router.post('/user', function (req, res) {
           msg: '网络异常, 请稍候重试'
         })
       } else if (data.length <= 0) {
-        // 没找到，登录失败
         res.json({
           code: 1,
           msg: '用户名或密码错误'
         })
       } else {
+        var token = jwt.sign({
+          data: String(data[0]._id),
+        }, secret, {
+          expiresIn: 60
+        })
         res.json({
           code: 0,
           msg: '登录成功',
-          data: data[0]
+          data: {
+            user: data[0],
+            token
+          }
         })
       }
       client.close();
