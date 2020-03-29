@@ -60,11 +60,17 @@ router.post('/user', function (req, res) {
           msg: '用户名或密码错误'
         })
       } else {
-        var token = jwt.sign({
-          data: String(data[0]._id),
-        }, secret, {
-          expiresIn: 60
-        })
+        var token;
+        if (data[0].userName == 'passenger') {
+          token = '5e3fd7109ce3d27781b07b92'
+        } else {
+          token = jwt.sign({
+            data: String(data[0]._id),
+          }, secret, {
+            expiresIn: 24 * 60 * 60
+          })
+        }
+        delete data[0].password
         res.json({
           code: 0,
           msg: '登录成功',
