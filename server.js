@@ -6,7 +6,7 @@ var jwt = require('jsonwebtoken')
 var {
 	secret
 } = require('./config')
-app.use(express.static('./'));
+app.use(express.static('./public'));
 // 引入路由模块
 var LoginRouter = require('./routes/login.js')
 var AlbumRouter = require('./routes/album.js');
@@ -14,12 +14,11 @@ var BlogRouter = require('./routes/blog.js');
 var UserRouter = require('./routes/user.js');
 // 使用路由模块，中间件
 app.all("*", function (req, res, next) {
-	//设置允许跨域的域名，*代表允许任意域名跨域
 	res.header("Access-Control-Allow-Origin", "*");
-	//允许的header类型
-	res.header("Access-Control-Allow-Headers", "content-type");
-	//跨域允许的请求方式
-	res.header("Access-Control-Allow-Methods", "DELETE,PUT,POST,GET,OPTIONS");
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild');
+  res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+  res.header("X-Powered-By", ' 3.2.1')
+  res.header("Content-Type", "application/json;charset=utf-8");
 	var token = req.headers.token
 	var isGet = req.method == 'GET'
 	// 游客不需要验证
