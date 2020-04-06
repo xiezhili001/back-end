@@ -79,7 +79,7 @@ router.get('/list', function (req, res) {
 router.post('/add', function (req, res) {
   // 1. 获取前端传递过来的参数
   var classify = req.body.classify;
-  var imgUrl = '/' + req.body.url;
+  var imgUrl = req.body.url;
   var date = new Date().getTime();
 
   // 3. 链接数据库做验证
@@ -126,10 +126,11 @@ router.post('/upload', multer({
   let path = 'public/img/' + Date.now().toString() + '_' + file.originalname;
   fs.renameSync('./public/img/' + file.filename, path);
   //获取文件基本信息
+  console.log(path);
   fileInfo.type = file.mimetype;
   fileInfo.name = file.originalname;
   fileInfo.size = file.size;
-  fileInfo.path = path;
+  fileInfo.path = path.replace('public','');
   res.json({
     code: 0,
     msg: 'OK',

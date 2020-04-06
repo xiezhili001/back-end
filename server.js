@@ -13,16 +13,21 @@ var AlbumRouter = require('./routes/album.js');
 var BlogRouter = require('./routes/blog.js');
 var UserRouter = require('./routes/user.js');
 // 使用路由模块，中间件
-app.all("*", function (req, res, next) {
+app.all('*', function (req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*");
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild');
-  res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
-  res.header("X-Powered-By", ' 3.2.1')
-  res.header("Content-Type", "application/json;charset=utf-8");
+	res.header("Access-Control-Allow-Headers", "*");
+	res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+	res.header("X-Powered-By", ' 3.2.1');
+	res.header("Content-Type", "application/json;charset=utf-8");
+	next();
+});
+app.all("*", function (req, res, next) {
 	var token = req.headers.token
 	var isGet = req.method == 'GET'
 	// 游客不需要验证
-	if (token == '5e3fd7109ce3d27781b07b92' && req.path != '/api/login/user') {
+	if (req.path == '/api/album/upload') {
+		next()
+	} else if (token == '5e3fd7109ce3d27781b07b92' && req.path != '/api/login/user') {
 		if (isGet) {
 			next();
 		} else {
